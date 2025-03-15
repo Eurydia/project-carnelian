@@ -202,6 +202,7 @@ export const App = () => {
               disableElevation
               variant="outlined"
               startIcon={<ClearRounded />}
+              onClick={() => setFile(null)}
             >
               Clear
             </Button>
