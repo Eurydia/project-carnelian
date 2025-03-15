@@ -133,8 +133,6 @@ export const App = () => {
     if (terms.length === 0) {
       return rows;
     }
-
-    // reduceRight will mean sorting is done by score for the _first_ entered word.
     return terms.reduceRight(
       (results, term) =>
         matchSorter(results, term, { keys: headers }),
@@ -202,7 +200,11 @@ export const App = () => {
               disableElevation
               variant="outlined"
               startIcon={<ClearRounded />}
-              onClick={() => setFile(null)}
+              onClick={() => {
+                setFile(null);
+                setHeaders([]);
+                setRows([]);
+              }}
             >
               Clear
             </Button>
@@ -363,4 +365,3 @@ export const App = () => {
     </ThemeProvider>
   );
 };
-
