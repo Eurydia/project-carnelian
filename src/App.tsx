@@ -13,6 +13,7 @@ import {
   createTheme,
   CssBaseline,
   Divider,
+  FormControlLabel,
   IconButton,
   InputAdornment,
   Stack,
@@ -46,6 +47,7 @@ const theme = createTheme({
 
 export const App = () => {
   const [file, setFile] = useState<File | null>(null);
+  const [hasComitted, setHasCommited] = useState(false);
   const [search, setSearch] = useState("");
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<
@@ -97,19 +99,30 @@ export const App = () => {
         while (existingHeaders.has(attendanceHeader)) {
           attendanceHeader += "1";
         }
+        let idHeader = "__id";
+        while (existingHeaders.has(idHeader)) {
+          idHeader += "1";
+        }
+
         setHeaders([
+          idHeader,
           attendanceHeader,
           ...results.meta.fields!,
         ]);
+
         setRows(() => {
           const next: Record<string, string | undefined>[] =
             [];
-          for (const item of results.data) {
+          for (const [
+            index,
+            item,
+          ] of results.data.entries()) {
             const _item = item as Record<
               string,
               string | undefined
             >;
             _item[attendanceHeader] = undefined;
+            _item[idHeader] = index.toString();
             next.push(_item);
           }
           return next;
@@ -122,6 +135,7 @@ export const App = () => {
         toast.error("Open failed");
       },
     });
+    setHasCommited(true);
   }, [file]);
 
   const searchedRows = useMemo(() => {
@@ -133,6 +147,7 @@ export const App = () => {
     if (terms.length === 0) {
       return rows;
     }
+
     return terms.reduceRight(
       (results, term) =>
         matchSorter(results, term, { keys: headers }),
@@ -150,7 +165,7 @@ export const App = () => {
 
   const arrivedEntryCount = useMemo(() => {
     return rows.filter(
-      (row) => row[headers[0]] !== undefined
+      (row) => row[headers[1]] !== undefined
     ).length;
   }, [rows, headers]);
 
@@ -169,8 +184,12 @@ export const App = () => {
         pauseOnFocusLoss={false}
       />
       <Box
+        sx={{
+          display: hasComitted ? "none" : undefined,
+          visibility: hasComitted ? "hidden" : undefined,
+        }}
         maxWidth="lg"
-        margin="auto"
+        marginX="auto"
         padding={2}
       >
         <Stack spacing={1}>
@@ -196,171 +215,160 @@ export const App = () => {
             >
               open
             </Button>
-            <Button
-              disableElevation
-              variant="outlined"
-              startIcon={<ClearRounded />}
-              onClick={() => {
-                setFile(null);
-                setHeaders([]);
-                setRows([]);
-              }}
-            >
-              Clear
-            </Button>
           </Toolbar>
         </Stack>
       </Box>
       <Stack
         spacing={2}
         padding={2}
+        sx={{
+          display: !hasComitted ? "none" : undefined,
+          visibility: !hasComitted ? "hidden" : undefined,
+        }}
       >
-        {headers.length > 0 && rows.length > 0 && (
-          <>
-            <TextField
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchRounded />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setSearch("")}
-                      >
-                        <ClearRounded />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-              }}
-            />
-            <Toolbar
-              disableGutters
-              variant="dense"
-              sx={{ justifyContent: "space-between" }}
-            >
-              <Stack
-                direction="row"
-                spacing={2}
-                divider={
-                  <Divider
-                    flexItem
-                    variant="fullWidth"
-                    orientation="vertical"
-                  />
-                }
-              >
-                <Typography>
-                  Total: {allEntryCount}
-                </Typography>
-                <Typography>
-                  Showing: {visibleEntryCount}
-                </Typography>
-                <Typography>
-                  Arrived: {arrivedEntryCount}
-                </Typography>
-                <Typography>
-                  Missing: {missingEntryCount}
-                </Typography>
-              </Stack>
-              <Button
-                disableElevation
-                startIcon={<DownloadRounded />}
-                variant="contained"
-                onClick={handleFileSave}
-              >
-                export
-              </Button>
-            </Toolbar>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      <Typography
-                        sx={{
-                          wordBreak: "keep-all",
-                          textWrap: "nowrap",
-                        }}
-                      >
-                        {headers[0]}
+        <TextField
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchRounded />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setSearch("")}>
+                    <ClearRounded />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+          }}
+        />
+        <Toolbar
+          disableGutters
+          variant="dense"
+          sx={{ justifyContent: "space-between" }}
+        >
+          <Stack
+            direction="row"
+            spacing={2}
+            divider={
+              <Divider
+                flexItem
+                variant="fullWidth"
+                orientation="vertical"
+              />
+            }
+          >
+            <Typography>Total: {allEntryCount}</Typography>
+            <Typography>
+              Showing: {visibleEntryCount}
+            </Typography>
+            <Typography>
+              Arrived: {arrivedEntryCount}
+            </Typography>
+            <Typography>
+              Missing: {missingEntryCount}
+            </Typography>
+          </Stack>
+          <Button
+            disableElevation
+            startIcon={<DownloadRounded />}
+            variant="contained"
+            onClick={handleFileSave}
+          >
+            export
+          </Button>
+        </Toolbar>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <Typography
+                    sx={{
+                      wordBreak: "keep-all",
+                      textWrap: "nowrap",
+                    }}
+                  >
+                    {headers[1]}
+                  </Typography>
+                </TableCell>
+                {headers.slice(2).map((header) => (
+                  <TableCell key={"header" + header}>
+                    <Typography
+                      sx={{
+                        wordBreak: "keep-all",
+                        textWrap: "nowrap",
+                      }}
+                    >
+                      {header}
+                    </Typography>
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {searchedRows.map((row, index) => (
+                <TableRow key={"row-data" + index}>
+                  <TableCell>
+                    {row[headers[1]] !== undefined && (
+                      <Typography>
+                        {row[headers[1]]}
                       </Typography>
-                    </TableCell>
-                    {headers.slice(1).map((header) => (
-                      <TableCell key={"header" + header}>
-                        <Typography
-                          sx={{
-                            wordBreak: "keep-all",
-                            textWrap: "nowrap",
-                          }}
+                    )}
+                    {row[headers[1]] === undefined && (
+                      <FormControlLabel
+                        onChange={(_, value) => {
+                          if (value) {
+                            setRows((prev) => {
+                              const next = [...prev];
+                              const now = new Date(
+                                Date.now()
+                              );
+                              console.log(row[headers[0]])!;
+                              next[
+                                Number.parseInt(
+                                  row[headers[0]]!
+                                )
+                              ][headers[1]] =
+                                now.toISOString();
+                              return next;
+                            });
+                          }
+                        }}
+                        control={<Checkbox />}
+                        label={
+                          <Typography>Check in</Typography>
+                        }
+                      />
+                    )}
+                  </TableCell>
+                  {headers
+                    .slice(2)
+                    .map((header, cellIndex) => {
+                      const data = row[header] ?? "";
+                      return (
+                        <TableCell
+                          key={
+                            "row-item" + index + cellIndex
+                          }
                         >
-                          {header}
-                        </Typography>
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {searchedRows.map((row, index) => (
-                    <TableRow key={"row-data" + index}>
-                      <TableCell>
-                        {row[headers[0]] !== undefined && (
                           <Typography>
-                            {row[headers[0]]}
+                            {data.normalize()}
                           </Typography>
-                        )}
-                        {row[headers[0]] === undefined && (
-                          <Checkbox
-                            onChange={(_, value) => {
-                              if (value) {
-                                setRows((prev) => {
-                                  const next = [...prev];
-                                  const now = new Date(
-                                    Date.now()
-                                  );
-                                  next[index][headers[0]] =
-                                    now.toISOString();
-                                  return next;
-                                });
-                              }
-                            }}
-                          />
-                        )}
-                      </TableCell>
-                      {headers
-                        .slice(1)
-                        .map((header, cellIndex) => {
-                          const data = row[header];
-                          return (
-                            <TableCell
-                              key={
-                                "row-item" +
-                                index +
-                                cellIndex
-                              }
-                            >
-                              {data !== undefined && (
-                                <Typography>
-                                  {data.normalize()}
-                                </Typography>
-                              )}
-                            </TableCell>
-                          );
-                        })}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </>
-        )}
+                        </TableCell>
+                      );
+                    })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Stack>
     </ThemeProvider>
   );
