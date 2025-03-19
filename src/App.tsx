@@ -2,8 +2,8 @@ import { ThemeProvider } from "@emotion/react";
 import {
   ClearRounded,
   DownloadRounded,
+  EditRounded,
   SearchRounded,
-  SendRounded,
 } from "@mui/icons-material";
 import {
   alpha,
@@ -90,6 +90,7 @@ export const App = () => {
       return;
     }
     parse(file, {
+      skipEmptyLines: true,
       header: true,
       complete: (results) => {
         const existingHeaders = new Set(
@@ -210,7 +211,7 @@ export const App = () => {
             <Button
               disableElevation
               variant="contained"
-              startIcon={<SendRounded />}
+              startIcon={<EditRounded />}
               onClick={handleFileSubmit}
             >
               open
@@ -314,39 +315,38 @@ export const App = () => {
             </TableHead>
             <TableBody>
               {searchedRows.map((row, index) => (
-                <TableRow key={"row-data" + index}>
+                <TableRow
+                  key={"row-data" + index}
+                  selected
+                >
                   <TableCell>
-                    {row[headers[1]] !== undefined && (
-                      <Typography>
-                        {row[headers[1]]}
-                      </Typography>
-                    )}
-                    {row[headers[1]] === undefined && (
-                      <FormControlLabel
-                        onChange={(_, value) => {
-                          if (value) {
-                            setRows((prev) => {
-                              const next = [...prev];
-                              const now = new Date(
-                                Date.now()
-                              );
-                              console.log(row[headers[0]])!;
-                              next[
-                                Number.parseInt(
-                                  row[headers[0]]!
-                                )
-                              ][headers[1]] =
-                                now.toISOString();
-                              return next;
-                            });
-                          }
-                        }}
-                        control={<Checkbox />}
-                        label={
-                          <Typography>Check in</Typography>
-                        }
-                      />
-                    )}
+                    <FormControlLabel
+                      onChange={(_, value) => {
+                        setRows((prev) => {
+                          const next = [...prev];
+                          const now = new Date(Date.now());
+
+                          const primaryKey =
+                            Number.parseInt(
+                              row[headers[0]]!
+                            );
+
+                          next[primaryKey][headers[1]] =
+                            value
+                              ? now.toUTCString()
+                              : undefined;
+                          return next;
+                        });
+                      }}
+                      control={<Checkbox />}
+                      label={
+                        <Typography>
+                          {row[headers[1]] === undefined
+                            ? "Check in"
+                            : row[headers[1]]}
+                        </Typography>
+                      }
+                    />
                   </TableCell>
                   {headers
                     .slice(2)
