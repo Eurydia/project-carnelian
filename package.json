@@ -1,7 +1,7 @@
 {
   "name": "project-carnelian",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -44,4 +44,3 @@
     "vite-tsconfig-paths": "^5.1.4"
   }
 }
-
