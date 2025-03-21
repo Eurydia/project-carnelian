@@ -132,6 +132,17 @@ export const App = () => {
     setHasCommited(true);
   }, [file]);
 
+  const handleCheckin = useCallback(
+    (index: number, value: string | undefined) => {
+      setRows((prev) => {
+        const next = [...prev];
+        next[index][headers[0]] = value;
+        return next;
+      });
+    },
+    [headers]
+  );
+
   const searchedRows = useMemo(() => {
     const terms = search
       .split(" ")
@@ -281,7 +292,7 @@ export const App = () => {
         <StyledTable
           headers={headers}
           rows={searchedRows}
-          onCheckin={setRows}
+          onCheckin={handleCheckin}
         />
       </Stack>
     </ThemeProvider>

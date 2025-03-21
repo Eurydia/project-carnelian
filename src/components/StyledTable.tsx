@@ -9,20 +9,14 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import {
-  FC,
-  SetStateAction,
-  useCallback,
-  useMemo,
-} from "react";
+import { FC, useCallback, useMemo } from "react";
 
 type Props = {
   headers: string[];
   rows: Record<string, string | undefined>[];
   onCheckin: (
-    value: SetStateAction<
-      Record<string, string | undefined>[]
-    >
+    rowIndex: number,
+    value: string | undefined
   ) => void;
 };
 export const StyledTable: FC<Props> = (props) => {
@@ -37,19 +31,16 @@ export const StyledTable: FC<Props> = (props) => {
       row: Record<string, string | undefined>,
       value: boolean
     ) => {
-      onCheckin((prev) => {
-        const next = [...prev];
-        const now = new Date(Date.now());
-
-        const primaryKey = Number.parseInt(
-          row[headers[0]]!
-        );
-
-        next[primaryKey][headers[1]] = value
-          ? now.toLocaleDateString()
-          : undefined;
-        return next;
-      });
+      const id = row[headers[0]];
+      if (id === undefined) {
+        return;
+      }
+      const rowIndex = Number.parseInt(id);
+      const now = new Date(Date.now());
+      onCheckin(
+        rowIndex,
+        value ? now.toDateString() : undefined
+      );
     },
     [headers, onCheckin]
   );
@@ -96,7 +87,7 @@ export const StyledTable: FC<Props> = (props) => {
                     <Typography>
                       {row[headers[1]] !== undefined
                         ? `Checked in @ ${row[headers[1]]}`
-                        : "Not checked in"}
+                        : "Check in"}
                     </Typography>
                   }
                 >
@@ -109,12 +100,11 @@ export const StyledTable: FC<Props> = (props) => {
                 </Tooltip>
               </TableCell>
               {dataHeaders.map((header, cellIndex) => {
-                const entry = row[header] ?? "";
                 return (
                   <TableCell
                     key={"row-item" + index + cellIndex}
                   >
-                    <Typography>{entry}</Typography>
+                    <Typography>{row[header]}</Typography>
                   </TableCell>
                 );
               })}
