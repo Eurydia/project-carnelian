@@ -136,7 +136,7 @@ export const App = () => {
     (index: number, value: string | undefined) => {
       setRows((prev) => {
         const next = [...prev];
-        next[index][headers[0]] = value;
+        next[index][headers[1]] = value;
         return next;
       });
     },

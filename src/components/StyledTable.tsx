@@ -36,6 +36,9 @@ export const StyledTable: FC<Props> = (props) => {
         return;
       }
       const rowIndex = Number.parseInt(id);
+      if (Number.isNaN(rowIndex)) {
+        return;
+      }
       const now = new Date(Date.now());
       onCheckin(
         rowIndex,
