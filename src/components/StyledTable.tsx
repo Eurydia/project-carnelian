@@ -14,10 +14,7 @@ import { FC, useCallback, useMemo } from "react";
 type Props = {
   headers: string[];
   rows: Record<string, string | undefined>[];
-  onCheckin: (
-    rowIndex: number,
-    value: string | undefined
-  ) => void;
+  onCheckin: (rowIndex: number, value: boolean) => void;
 };
 export const StyledTable: FC<Props> = (props) => {
   const { headers, rows, onCheckin } = props;
@@ -39,11 +36,7 @@ export const StyledTable: FC<Props> = (props) => {
       if (Number.isNaN(rowIndex)) {
         return;
       }
-      const now = new Date(Date.now());
-      onCheckin(
-        rowIndex,
-        value ? now.toDateString() : undefined
-      );
+      onCheckin(rowIndex, value);
     },
     [headers, onCheckin]
   );

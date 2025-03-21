@@ -133,10 +133,13 @@ export const App = () => {
   }, [file]);
 
   const handleCheckin = useCallback(
-    (index: number, value: string | undefined) => {
+    (index: number, value: boolean) => {
       setRows((prev) => {
         const next = [...prev];
-        next[index][headers[1]] = value;
+        const now = new Date(Date.now());
+        next[index][headers[1]] = value
+          ? now.toISOString()
+          : undefined;
         return next;
       });
     },

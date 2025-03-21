@@ -1,13 +1,13 @@
 {
   "name": "project-carnelian",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "deploy": "gh-pages -d dist -b pages",
+    "deploy": "gh-pages -d dist",
     "preview": "vite preview"
   },
   "dependencies": {
