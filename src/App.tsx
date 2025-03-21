@@ -9,20 +9,12 @@ import {
   alpha,
   Box,
   Button,
-  Checkbox,
   createTheme,
   CssBaseline,
   Divider,
-  FormControlLabel,
   IconButton,
   InputAdornment,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Toolbar,
   Typography,
@@ -38,6 +30,7 @@ import {
   useState,
 } from "react";
 import { toast, ToastContainer } from "react-toastify";
+import { StyledTable } from "./components/StyledTable";
 const theme = createTheme({
   palette: {
     primary: brown,
@@ -138,6 +131,17 @@ export const App = () => {
     });
     setHasCommited(true);
   }, [file]);
+
+  const handleCheckin = useCallback(
+    (index: number, value: string | undefined) => {
+      setRows((prev) => {
+        const next = [...prev];
+        next[index][headers[0]] = value;
+        return next;
+      });
+    },
+    [headers]
+  );
 
   const searchedRows = useMemo(() => {
     const terms = search
@@ -285,90 +289,11 @@ export const App = () => {
             export
           </Button>
         </Toolbar>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  <Typography
-                    sx={{
-                      wordBreak: "keep-all",
-                      textWrap: "nowrap",
-                    }}
-                  >
-                    {headers[1]}
-                  </Typography>
-                </TableCell>
-                {headers.slice(2).map((header) => (
-                  <TableCell key={"header" + header}>
-                    <Typography
-                      sx={{
-                        wordBreak: "keep-all",
-                        textWrap: "nowrap",
-                      }}
-                    >
-                      {header}
-                    </Typography>
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {searchedRows.map((row, index) => (
-                <TableRow
-                  key={"row-data" + index}
-                  selected
-                >
-                  <TableCell>
-                    <FormControlLabel
-                      onChange={(_, value) => {
-                        setRows((prev) => {
-                          const next = [...prev];
-                          const now = new Date(Date.now());
-
-                          const primaryKey =
-                            Number.parseInt(
-                              row[headers[0]]!
-                            );
-
-                          next[primaryKey][headers[1]] =
-                            value
-                              ? now.toUTCString()
-                              : undefined;
-                          return next;
-                        });
-                      }}
-                      control={<Checkbox />}
-                      label={
-                        <Typography>
-                          {row[headers[1]] === undefined
-                            ? "Check in"
-                            : row[headers[1]]}
-                        </Typography>
-                      }
-                    />
-                  </TableCell>
-                  {headers
-                    .slice(2)
-                    .map((header, cellIndex) => {
-                      const data = row[header] ?? "";
-                      return (
-                        <TableCell
-                          key={
-                            "row-item" + index + cellIndex
-                          }
-                        >
-                          <Typography>
-                            {data.normalize()}
-                          </Typography>
-                        </TableCell>
-                      );
-                    })}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <StyledTable
+          headers={headers}
+          rows={searchedRows}
+          onCheckin={handleCheckin}
+        />
       </Stack>
     </ThemeProvider>
   );
