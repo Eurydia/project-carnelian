@@ -76,7 +76,7 @@ export const StyledTable: FC<Props> = (props) => {
               key={"row-data" + index}
               selected
             >
-              <TableCell>
+              <TableCell align="center">
                 <Tooltip
                   placement="right"
                   title={
