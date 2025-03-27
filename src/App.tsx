@@ -235,6 +235,7 @@ export const App = () => {
         }}
       >
         <TextField
+          placeholder="Search"
           slotProps={{
             input: {
               startAdornment: (
